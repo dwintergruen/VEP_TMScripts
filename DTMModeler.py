@@ -152,8 +152,8 @@ def join_save(jstr,stri):
 def writeDefaultMeta(pss_all, modelDir):
     with open(os.path.join(modelDir, 'metadata.csv'), 'w',encoding="utf-8") as mFile:
         metaWriter = csv.writer(mFile)
-        metaWriter.writerow(['id','filename',"title","date","year","author"])
-        metaWriter.writerow(['int','str','str',"str","int","str"])
+        metaWriter.writerow(['id','filename',"title","date","year","author","doi","bibcode"])
+        metaWriter.writerow(['int','str','str',"str","int","str","str","str"])
         for i in range(len(pss_all)):
             metaWriter.writerow([i, 
                                  str(i),
@@ -161,6 +161,8 @@ def writeDefaultMeta(pss_all, modelDir):
                                  pss_all[i].date,
                                  getYear(pss_all[i]),
                                  join_save(" ",pss_all[i].author),
+                                 pss_all[i].doi,
+                                 pss_all[i].bibcode,
                                  ])
 
 # Given GenSim model and containing director, write topics to CSV files for use in Serendip
