@@ -47,7 +47,7 @@ def buildGSmodel(args):
     fullStartTime = time.time()
     model_name = "%s_%s_%s-%s"%(args.model_name,args.num_topics,args.start_year,args.end_year)
     modelDir = os.path.join(args.output_path, model_name)
-    
+    articleData_file_pattern = args.data_file_pattern #"/var/tmp/ps_%s.pickle"
     if not args.silent:
         print ('Creating  corpus...')
         start = time.time()
@@ -59,7 +59,7 @@ def buildGSmodel(args):
     pss_all = []
     abstracts = []
     for y in range(args.start_year,args.end_year+1):
-        pss[y] = pickle.load(open("/var/tmp/ps_%s.pickle"%y,"rb"))
+        pss[y] = pickle.load(open(articleData_file_pattern%y,"rb"))
         abstr = []
         for p in pss[y]:
             titles = p.title
@@ -349,6 +349,7 @@ if __name__=='__main__':
     parser.add_argument('-m','--model_name', help='name of the model', required=True)
     #parser.add_argument('--corpus_path', help='path to corpus directory', required=True)
     parser.add_argument('-o','--output_path', help='path to output directory (new directory by will be made for model_name', required=True)
+    parser.add_argument('-fp','--data_file_pattern', help='pattern for the articles per year z.b. var/tmp/ps_%s.pickle ', required=True)
     parser.add_argument('-n', '--num_topics', help='number of topics to infer', type=int, required=True)
     parser.add_argument('-s', '--start_year', help='start-year', type=int, required=True)
     parser.add_argument('-e', '--end_year', help='end-year', type=int, required=True)
