@@ -312,7 +312,7 @@ class RegexTokenizer(Tokenizer):
         # Compile the final pattern. Those strings have whitespace, so make
         # sure re.VERBOSE is one of the flags used!
         
-        self.tokenize_pattern = re.compile(final_tokenize_pattern_str, re.RegexFlag.I | re.RegexFlag.VERBOSE)
+        self.tokenize_pattern = re.compile(final_tokenize_pattern_str, re.I | re.VERBOSE)
 
     def _format_token_entity(self, m, token_data):
         """
@@ -403,10 +403,10 @@ class RegexTokenizer(Tokenizer):
                 inner_word_hyphens = re.findall(self.__pattern_str_inner_word_hyphen, token_strs[0])
                 if len(inner_word_hyphens) == 0:
                     # Remove the text of the hyphen_break groups.
-                    token_str = re.sub(self._pattern_str_hyphen_break, "", token_strs[0], flags=re.RegexFlag.I | re.RegexFlag.VERBOSE)
+                    token_str = re.sub(self._pattern_str_hyphen_break, "", token_strs[0], flags=re.I | re.VERBOSE)
                 else:
                     # Replace the "hyphen breaks" with single hyphens instead.
-                    token_str = re.sub(self._pattern_str_hyphen_break, "-", token_strs[0], flags=re.RegexFlag.I | re.RegexFlag.VERBOSE)
+                    token_str = re.sub(self._pattern_str_hyphen_break, "-", token_strs[0], flags=re.I | re.VERBOSE)
                     # Are we supposed to pass along the original token string?
                 if self.preserve_original_strs:
                     token_strs.insert(0, token_str)

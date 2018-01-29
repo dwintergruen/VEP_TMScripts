@@ -27,6 +27,7 @@ from RegexTokenizer import RegexTokenizer as RegT
 
 # Helper function that creates new directories, overwriting old ones if necessary and desired.
 def createDir(name, force=False):
+    force = True
     if os.path.exists(name):
         if force:
             shutil.rmtree(name)
@@ -140,7 +141,7 @@ def getYear(art):
     splitted = art.date.split("-")
     return splitted[0]
 
-def join_save(jstr,stri):
+def join_safe(jstr,stri):
     if stri is None:
         return ""
     
@@ -157,10 +158,10 @@ def writeDefaultMeta(pss_all, modelDir):
         for i in range(len(pss_all)):
             metaWriter.writerow([i, 
                                  str(i),
-                                 " ".join(pss_all[i].title).replace('"',''),
+                                 join_safe(" ",pss_all[i].title),
                                  pss_all[i].date,
                                  getYear(pss_all[i]),
-                                 join_save(" ",pss_all[i].author),
+                                 join_safe(" ",pss_all[i].author),
                                  pss_all[i].doi,
                                  pss_all[i].bibcode,
                                  ])
@@ -239,7 +240,7 @@ def tag_corpus(modelDir,pss_all, clf, wordlist, theta, doctopic, serendipDir,  n
     
     for textNum in range(len(pss_all)):
         
-        textStr = " ".join(pss_all[textNum].title) + "\n" + pss_all[textNum].abstract if pss_all[textNum].abstract is not None else ""
+        textStr =join_safe(" ",pss_all[textNum].title) + "\n" + pss_all[textNum].abstract if pss_all[textNum].abstract is not None else ""
         try:
             currTokens = taggingTokenizer.tokenize(textStr)
         except TypeError:
