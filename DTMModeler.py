@@ -1,7 +1,6 @@
 from past.builtins.misc import raw_input
 from fpdf.php import print_r
 __author__ = 'ealexand'
-
 import os
 import shutil
 import sys
@@ -22,9 +21,6 @@ from sklearn import decomposition
 from RegexTokenizer import RegexTokenizer as RegT
 
 #from nonnegfac.nmf import NMF
-
-
-
 # Helper function that creates new directories, overwriting old ones if necessary and desired.
 def createDir(name, force=False):
     if os.path.exists(name):
@@ -51,9 +47,7 @@ def buildGSmodel(args):
     if not args.silent:
         print ('Creating  corpus...')
         start = time.time()
-    
-    vectorizer = text.CountVectorizer(stop_words="english", min_df=2)  
-    
+    vectorizer = text.CountVectorizer(stop_words="english", min_df=2)
     #load texts
     pss = {}
     pss_all = []
@@ -67,8 +61,6 @@ def buildGSmodel(args):
                 titles = " ".join(p.title)
             else:
                 titles = ""
-            
-         
             abstr.append(p.abstract + titles if not p.abstract is None else titles)
         pss_all += pss[y]
         abstracts += abstr
@@ -77,8 +69,11 @@ def buildGSmodel(args):
     if not args.silent:
         print ('Build NMF model...')
         start = time.time()
-    
-    dtm = vectorizer.fit_transform(abstracts).toarray()
+    try:
+        dtm = vectorizer.fit_transform(abstracts).toarray()
+    except ValueError:
+        print("cant't vectorize - empty?")
+        return {}
     wordList = np.array(vectorizer.get_feature_names())   
     clf = decomposition.NMF(n_components=args.num_topics, random_state=1)
     doctopic = clf.fit_transform(dtm)
@@ -204,7 +199,7 @@ def writeTopicCSVs(modelDir, doctopic, wordList, clf, serendipDir , wordThreshol
 def tag_corpus(modelDir,pss_all, clf, wordlist, theta, doctopic, serendipDir,  nameToChunkNums=None, silent=False):
 
     if not silent:
-        print ('Tagging texts and writing token CSVs...')
+        print ('Tagging texts and writing token CSVs...(%s docs)'%len(pss_all))
         tokenStart = time.time()
 
     # Make the HTML directory for Serendip
@@ -236,8 +231,8 @@ def tag_corpus(modelDir,pss_all, clf, wordlist, theta, doctopic, serendipDir,  n
     # Loop through the texts and tag 'em
     
     for textNum in range(len(pss_all)):
-        
-        textStr = " ".join(pss_all[textNum].title) + "\n" + pss_all[textNum].abstract if pss_all[textNum].abstract is not None else ""
+        abstract =  pss_all[textNum].abstract if pss_all[textNum].abstract is not None else ""
+        textStr = " ".join(pss_all[textNum].title) + "\n" + abstract
         try:
             currTokens = taggingTokenizer.tokenize(textStr)
         except TypeError:
@@ -245,10 +240,6 @@ def tag_corpus(modelDir,pss_all, clf, wordlist, theta, doctopic, serendipDir,  n
             continue
         rules = {}
         outList = []
-        if args.chunk_size:
-            wordIndex = 0
-            #textChunks = nameToChunkNums[textName]
-            chunkIndex = 0
 
         # Loop through all the tokens in the file
         for tokenIndex in range(len(currTokens)):
@@ -304,10 +295,9 @@ def tag_corpus(modelDir,pss_all, clf, wordlist, theta, doctopic, serendipDir,  n
                     while densityTot < rand:
                         try:
                             topic, prop = p_tGwd[relevantTextIndex][word][i]
+                            densityTot += prop
                         except IndexError:
-                            pass
-                            
-                        densityTot += prop
+                            break
                         i += 1
                         # TODO: also get the rank_bin
 

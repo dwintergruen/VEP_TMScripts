@@ -1,3 +1,4 @@
+from past.builtins.misc import raw_input
 __author__ = 'ealexand'
 
 import os
@@ -15,7 +16,7 @@ import math
 from gensim import corpora, models, similarities
 from nltk.corpus import stopwords
 #from nonnegfac.nmf import NMF
-from RegexTokenizer import RegexTokenizer as RegT
+from nltk.tokenize.rexp import RegexpTokenizer as RegT
 
 
 # Helper function that creates new directories, overwriting old ones if necessary and desired.
