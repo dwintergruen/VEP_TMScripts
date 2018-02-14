@@ -22,6 +22,7 @@ from RegexTokenizer import RegexTokenizer as RegT
 
 #from nonnegfac.nmf import NMF
 # Helper function that creates new directories, overwriting old ones if necessary and desired.
+
 def createDir(name, force=False):
     force = True
     if os.path.exists(name):
