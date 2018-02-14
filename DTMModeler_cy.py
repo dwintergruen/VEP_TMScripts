@@ -8,7 +8,7 @@ from Cython.Build import cythonize
 
 
 
-extensions = [Extension("VEP_TMScripts.DTMModeler", ["DTMModeler.pyx"]),
+extensions = [Extension("VEP_TMScripts.DTMModeler", ["DTMModeler.py"]),
               Extension("ads.__init__", ["/usr/local/lib/python3.6/site-packages/ads/__init__.py"]),
               Extension("ads.*", ["/usr/local/lib/python3.6/site-packages/ads/*.py"]),
               Extension("werkzeug.__init__", ["/usr/local/lib/python3.6/site-packages/werkzeug/__init__.py"]),
