@@ -19,6 +19,9 @@ import sklearn.feature_extraction.text as text
 import pickle
 from sklearn import decomposition
 from RegexTokenizer import RegexTokenizer as RegT
+import cython
+from nltk.corpus import stopwords
+from nltk.tokenize import WhitespaceTokenizer
 
 #from nonnegfac.nmf import NMF
 # Helper function that creates new directories, overwriting old ones if necessary and desired.
@@ -41,7 +44,31 @@ def createDir(name, force=False):
                 exit(1)
     os.makedirs(name, exist_ok=True)
 
+
+def tokenizer(text):
+
+    stop_words = stopwords.words("german") + stopwords.words("english") + ["sub","sup"]
+    for t in WhitespaceTokenizer().tokenize(text):
+        if t in stop_words:
+            continue
+        try:
+            float(t)
+            continue
+        except ValueError:
+            pass
+        try:
+            int(t)
+            continue
+        except ValueError:
+            pass
+        yield t
+
+
 def buildGSmodel(args):
+    if cython.compiled:
+        print("Yep, I'm compiled.")
+    else:
+        print("XJust a lowly interpreted script.")
     fullStartTime = time.time()
     model_name = "%s_%s_%s-%s"%(args.model_name,args.num_topics,args.start_year,args.end_year)
     modelDir = os.path.join(args.output_path, model_name)
@@ -49,7 +76,9 @@ def buildGSmodel(args):
     if not args.silent:
         print ('Creating  corpus...')
         start = time.time()
-    vectorizer = text.CountVectorizer(stop_words="english", min_df=2)
+
+
+    vectorizer = text.CountVectorizer(tokenizer=tokenizer, min_df=2)
     #load texts
     pss = {}
     pss_all = []
