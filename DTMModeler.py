@@ -21,7 +21,7 @@ from sklearn import decomposition
 from RegexTokenizer import RegexTokenizer as RegT
 import cython
 from nltk.corpus import stopwords
-from nltk.tokenize import WhitespaceTokenizer
+from nltk.tokenize import WordPunctTokenizer
 
 #from nonnegfac.nmf import NMF
 # Helper function that creates new directories, overwriting old ones if necessary and desired.
@@ -48,7 +48,11 @@ def createDir(name, force=False):
 def tokenizer(text):
 
     stop_words = stopwords.words("german") + stopwords.words("english") + ["sub","sup"]
-    for t in WhitespaceTokenizer().tokenize(text):
+    for t in WordPunctTokenizer().tokenize(text):
+
+        if len(t)==1:
+            continue
+
         if t in stop_words:
             continue
         try:
@@ -78,7 +82,7 @@ def buildGSmodel(args):
         start = time.time()
 
 
-    vectorizer = text.CountVectorizer(tokenizer=tokenizer, min_df=2)
+    vectorizer = text.CountVectorizer(tokenizer=tokenizer)
     #load texts
     pss = {}
     pss_all = []
