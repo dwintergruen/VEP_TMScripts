@@ -259,7 +259,7 @@ def tag_corpus(modelDir,pss_all, clf, wordlist, theta, doctopic, serendipDir,  n
         print ('Done making topic-word dictionaries. (%.2f seconds)' % (time.time() - tokenStart))
 
     # Query this p_tGwd[d][w] = ordered list of (topic, prop) descending by prop
-    p_tGwd = [ {} for d in range(len(theta)) ]
+    p_tGwd = [ {} for d in theta.index]
 
     # Build tokenizer for files to be tagged
     taggingTokenizer = RegT(case_sensitive=False,
@@ -269,8 +269,8 @@ def tag_corpus(modelDir,pss_all, clf, wordlist, theta, doctopic, serendipDir,  n
     # Loop through the texts and tag 'em
     
     for textNum in range(len(pss_all)):
-
-        textStr =join_safe(" ",pss_all[textNum].title) + "\n" + pss_all[textNum].abstract if pss_all[textNum].abstract is not None else ""
+        textAbstr =  (pss_all[textNum].abstract if pss_all[textNum].abstract is not None else "")
+        textStr =join_safe(" ",pss_all[textNum].title) + "\n" + textAbstr
 
         try:
             currTokens = taggingTokenizer.tokenize(textStr)
@@ -315,11 +315,11 @@ def tag_corpus(modelDir,pss_all, clf, wordlist, theta, doctopic, serendipDir,  n
                         for t in range(len(clf.components_)):
                             try:
                                 wordnum = word2id[word]
-                                tmpProp = topicDicts[t][wordnum] * theta[relevantTextIndex][t]
+                                #tmpProp = topicDicts[t][wordnum] * theta[relevantTextIndex][t]
+                                tmpProp = topicDicts[t][wordnum] * theta[t][relevantTextIndex]
                                 tmpTopicPropList.append([t, tmpProp])
                                 tot += tmpProp
                                 # May get a KeyError if word isn't in topicDicts[t] or t isn't in theta[textNum]
-
                             except KeyError:
                                 continue
                         for i in range(len(tmpTopicPropList)):
@@ -331,16 +331,19 @@ def tag_corpus(modelDir,pss_all, clf, wordlist, theta, doctopic, serendipDir,  n
                     rand = random.random()
                     densityTot = 0.0
                     i = 0
-                    while densityTot < rand:
+                    topic = None
+                    while densityTot < rand and i < len(p_tGwd[relevantTextIndex][word]):
                         try:
                             topic, prop = p_tGwd[relevantTextIndex][word][i]
                             densityTot += prop
                         except IndexError:
-                            break
+                            pass
                         i += 1
                         # TODO: also get the rank_bin
 
                     # Add rule to rules for sampled topic
+                    if topic is None:
+                        print("NO TOPIC")
                     rule_name = 'topic_%d' % topic
                     if rule_name in rules:
                         rules[rule_name]['num_tags'] += 1
