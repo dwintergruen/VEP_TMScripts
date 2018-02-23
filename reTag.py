@@ -7,6 +7,7 @@ import pickle
 import random
 import json
 import csv
+import argparse
 import time
 def tag_corpus(topicFolder,start_year,end_year,articleData_file_pattern,silent=False):
     pss = {}
@@ -197,4 +198,16 @@ def tag_corpus(topicFolder,start_year,end_year,articleData_file_pattern,silent=F
 
 if __name__ == "__main__":
     print("start")
-    tag_corpus("/var/tmp/identified_topics/astrstopw2__40_1991-1997/TopicModel",1991,1997,"/Users/dwinter/Downloads/dataverse_files/ps_%s.pickle")
+    parser = argparse.ArgumentParser(description='A gensim-based topic modeler for Serendip')
+
+    parser.add_argument('-p', '--model_path', help='path to the models', required=True)
+    # parser.add_argument('--corpus_path', help='path to corpus directory', required=True)
+    parser.add_argument('-s', '--start_year',
+                        help='start year', required=True)
+    parser.add_argument('-e', '--end_year',
+                        help='end year', required=True)
+    parser.add_argument('-fp', '--data_file_pattern',
+                        help='pattern for the articles per year z.b. var/tmp/ps_%s.pickle ', required=True)
+
+    args = parser.parse_args()
+    tag_corpus(args.model_path,args.start_year,args.end_year,args.data_file_pattern)
