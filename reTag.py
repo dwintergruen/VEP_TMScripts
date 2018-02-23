@@ -219,7 +219,7 @@ if __name__ == "__main__":
     else:
         for f in os.listdir(args.model_path):
             years = f.split("_")[-1]#last to should be start end end year in filename e.g str_stopw__20_1945-1964
-            spitted = years.split("-")
+            splitted = years.split("-")
             tag_corpus(args.model_path, int(splitted[-2]), int(splitted[-1]), args.data_file_pattern)
 
 
