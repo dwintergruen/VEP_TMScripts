@@ -48,7 +48,7 @@ def createDir(name, force=False):
 def tokenizer(text):
 
     stop_words = stopwords.words("german") + stopwords.words("english") + ["sub","sup"]
-    stop_chars = "<>|()[]*.!=-+/\\"
+    stop_chars = "<>|()[]*.!=-+/\\,%\"'"
     
     for t in WordPunctTokenizer().tokenize(text):
         
@@ -101,7 +101,11 @@ def buildGSmodel(args):
                 titles = " ".join(p.title)
             else:
                 titles = ""
-            abstr.append(p.abstract + titles if not p.abstract is None else titles)
+            if p.abstract is None:
+                txt = titles
+            else:
+                txt = p.abstract + titles
+            abstr.append(txt)
         pss_all += pss[y]
         abstracts += abstr
     
@@ -117,12 +121,7 @@ def buildGSmodel(args):
     wordList = np.array(vectorizer.get_feature_names())   
     clf = decomposition.NMF(n_components=args.num_topics, random_state=1)
     doctopic = clf.fit_transform(dtm)
-    
-    topic_words = []
-    for topic in clf.components_:
-        word_idx = np.argsort(topic)[::-1][0:100]
-        topic_words.append([wordList[i] for i in word_idx])
-    
+
     #norm alize
     doctopic = doctopic / np.sum(doctopic, axis=1, keepdims=True)
        
@@ -164,12 +163,6 @@ def buildGSmodel(args):
         'model': doctopic
     }
 
-def bow2matrix(bow, numDocs, numWords):
-    s = dok_matrix((numWords, numDocs))
-    for docNum in range(len(bow)):
-        for wordId, count in bow[docNum]:
-            s[wordId, docNum] = count
-    return s
 
 def getYear(art):
     splitted = art.date.split("-")
@@ -256,9 +249,11 @@ def tag_corpus(modelDir,pss_all, clf, wordlist, theta, doctopic, serendipDir,  n
     for t in range(len(clf.components_)):
         topicArray = clf.components_[t]
         word_idx = np.argsort(topicArray)[::-1]           
-        
-        for i in range(len(wordlist)):
-            topicDicts[t][word_idx[i]] = topicArray[i]
+        for i in word_idx:
+            topicDicts[t][i] = topicArray[i]
+
+        #for i in range(len(wordlist)):
+        #    topicDicts[t][word_idx[i]] = topicArray[i]
             
     if not silent:
         print ('Done making topic-word dictionaries. (%.2f seconds)' % (time.time() - tokenStart))
