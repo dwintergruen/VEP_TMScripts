@@ -202,12 +202,25 @@ if __name__ == "__main__":
 
     parser.add_argument('-p', '--model_path', help='path to the models', required=True)
     # parser.add_argument('--corpus_path', help='path to corpus directory', required=True)
-    parser.add_argument('-s', '--start_year',
-                        help='start year', required=True)
-    parser.add_argument('-e', '--end_year',
-                        help='end year', required=True)
+
     parser.add_argument('-fp', '--data_file_pattern',
                         help='pattern for the articles per year z.b. var/tmp/ps_%s.pickle ', required=True)
 
+    parser.add_argument('-s', '--start_year',
+                       help='start year')
+    parser.add_argument('-e', '--end_year',
+                        help='end year')
+
+
     args = parser.parse_args()
-    tag_corpus(args.model_path,args.start_year,args.end_year,args.data_file_pattern)
+
+    if args.start_year is not None:
+        tag_corpus(args.model_path,args.start_year,args.end_year,args.data_file_pattern)
+    else:
+        for f in os.listdir(args.model_path):
+            splitted = f.split("_")#last to should be start end end year in filename e.g str_stopw__20_1945-1964
+            tag_corpus(args.model_path, int(splitted[-2]), int(splitted[-1]), args.data_file_pattern)
+
+
+
+
