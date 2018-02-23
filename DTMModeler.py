@@ -48,9 +48,14 @@ def createDir(name, force=False):
 def tokenizer(text):
 
     stop_words = stopwords.words("german") + stopwords.words("english") + ["sub","sup"]
+    stop_chars = "<>|()[]*.!=-+/\\"
+    
     for t in WordPunctTokenizer().tokenize(text):
-
-        if len(t)==1:
+        
+        for sc in stop_chars:
+            t=t.replace(sc,"")
+        
+        if len(t)<2:
             continue
 
         if t in stop_words:
@@ -70,9 +75,9 @@ def tokenizer(text):
 
 def buildGSmodel(args):
     if cython.compiled:
-        print("Yep, I'm compiled.")
+        print("XXYep, I'm compiled.")
     else:
-        print("XJust a lowly interpreted script.")
+        print("Just a lowly interpreted script. V2")
     fullStartTime = time.time()
     model_name = "%s_%s_%s-%s"%(args.model_name,args.num_topics,args.start_year,args.end_year)
     modelDir = os.path.join(args.output_path, model_name)
@@ -197,7 +202,7 @@ def writeDefaultMeta(pss_all, modelDir):
                                  ])
 
 # Given GenSim model and containing director, write topics to CSV files for use in Serendip
-def writeTopicCSVs(modelDir, doctopic, wordList, clf, serendipDir , wordThreshold=None, densityThreshold=0.99, silent=False):
+def writeTopicCSVs(modelDir, doctopic, wordList, clf, serendipDir , wordThreshold=None, densityThreshold=1, silent=False):
     if not silent:
         print ('Writing topics to CSV files...')
         topicStart = time.time()
