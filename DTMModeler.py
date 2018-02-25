@@ -75,9 +75,9 @@ def tokenizer(text):
 
 def buildGSmodel(args):
     if cython.compiled:
-        print("XXYep, I'm compiled.")
+        print("Yep, I'm compiled. V3")
     else:
-        print("Just a lowly interpreted script. V2")
+        print("Just a lowly interpreted script. V3")
     fullStartTime = time.time()
     model_name = "%s_%s_%s-%s"%(args.model_name,args.num_topics,args.start_year,args.end_year)
     modelDir = os.path.join(args.output_path, model_name)
