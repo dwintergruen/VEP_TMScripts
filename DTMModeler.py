@@ -18,13 +18,92 @@ from nltk.corpus import stopwords
 import sklearn.feature_extraction.text as text
 import pickle
 from sklearn import decomposition
-from RegexTokenizer import RegexTokenizer as RegT
+from VEP_TMScripts.RegexTokenizer import RegexTokenizer as RegT
 import cython
 from nltk.corpus import stopwords
 from nltk.tokenize import WordPunctTokenizer
 
 #from nonnegfac.nmf import NMF
 # Helper function that creates new directories, overwriting old ones if necessary and desired.
+
+def buildGSmodelFromText(txts,model_name,num_topics,output_path):
+
+    fullStartTime = time.time()
+    model_name = "%s_%s_%s-%s" % (model_name, num_topics)
+    modelDir = os.path.join(output_path, model_name)
+
+    vectorizer = text.CountVectorizer(tokenizer=tokenizer)
+    # load texts
+    pss = {}
+    pss_all = []
+    abstracts = []
+    for y,txt in txts.items():
+        abstr = []
+        for p in pss[y]:
+            titles = txt.title
+            if titles is not None:
+                titles = " ".join(txt.title)
+            else:
+                titles = ""
+
+            txt = p.txt
+            abstr.append(txt)
+        pss_all += pss[y]
+        abstracts += abstr
+
+    # Now build the model!
+    if not args.silent:
+        print('Build NMF model...')
+        start = time.time()
+    try:
+        dtm = vectorizer.fit_transform(abstracts).toarray()
+    except ValueError:
+        print("cant't vectorize - empty?")
+        return {}
+    wordList = np.array(vectorizer.get_feature_names())
+    clf = decomposition.NMF(n_components=args.num_topics, random_state=1)
+    doctopic = clf.fit_transform(dtm)
+
+    # norm alize
+    doctopic = doctopic / np.sum(doctopic, axis=1, keepdims=True)
+
+    # article_names = ["%s_%s_%s"%(p.author,p.date,p.title) for p in pss_all]
+    # article_names = np.asarray(article_names)
+    doctopic_orig = doctopic.copy()
+    # num_of_articles = len(set(article_names))
+
+    import pandas
+    theta = pandas.DataFrame(doctopic)
+    thetaT = theta.transpose()
+    # Build Serendip Files
+    serendipDir = os.path.join(modelDir, 'TopicModel')
+    createDir(serendipDir)
+    with open(os.path.join(serendipDir, 'theta.csv'), 'w', encoding="utf-8") as tFile:
+        for row in thetaT:
+            print_row = []
+            for x, y in dict(thetaT[row]).items():
+                if math.isnan(y):
+                    y = 0
+                print_row.append("%s,%s" % (x, y))
+            tFile.write(",".join(print_row))
+            tFile.write("\n")
+
+    # Build theta, both writing out theta.csv and the object theta
+    # theta is a list of dictionaries that map topic -> prop for each doc
+
+    writeTopicCSVs(modelDir, doctopic, wordList, clf, serendipDir)
+
+    writeDefaultMeta(pss_all, serendipDir)
+    tag_corpus(modelDir, pss_all, clf, wordList, theta, doctopic, serendipDir)
+
+    if not args.silent:
+        print('Total time elapsed: %.2f seconds' % (time.time() - fullStartTime))
+
+    return {
+        'fnames': pss,
+        'model': doctopic
+    }
+
 
 def createDir(name, force=False):
     force = True
