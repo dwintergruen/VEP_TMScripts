@@ -2,7 +2,7 @@
 __author__ = 'kohlmannj'
 
 import abc
-from BaseClass import BaseClass
+from VEP_TMScripts.BaseClass import BaseClass
 
 
 class Tokenizer(BaseClass):
