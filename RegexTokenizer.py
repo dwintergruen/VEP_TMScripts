@@ -5,7 +5,7 @@ __author__ = 'kohlmannj'
 
 import re
 #import HTMLParser
-from Tokenizer import Tokenizer
+from VEP_TMScripts.Tokenizer import Tokenizer
 
 
 class RegexTokenizer(Tokenizer):
